@@ -1,9 +1,10 @@
 ﻿#include "Header.h"
 
-int main()
-{
-	cout << "Программа Шарики." 
-		<< "Пользователь вводит цифру, означющие цвет, если набирается тройка чисел,"
-		<< "программ удаляет эту тройку." << endl;
+int main() {
+    setlocale(LC_ALL, "rus");
 
+    BallGame gameSession;
+    gameSession.run();
+
+    return 0;
 }
