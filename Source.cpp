@@ -1,61 +1,71 @@
 #include "Header.h"
 
-void BallGame::run() {
-    cout << "Добро пожаловать в Программу «Шарики»!\n"
-        << "Здесь вы вводите цифры, которые обозначают цвета шариков.\n"
-        << "При появлении трёх подряд одинаковых чисел, программа удаляет их.\n" << endl;
+void ballGame::run()
+{
+    cout << "Шарики\n"
+        << "Вы вводите цифры, которые обозначают цвета шариков.\n"
+        << "При появлении трёх и более подряд одинаковых чисел, программа удаляет их.\n" << endl;
 
-    string ballCountStr;
+    string ballStr;
+
     cout << "Введите общее количество шариков: ";
-    getline(cin, ballCountStr); // исполльзуем строку, чтобы сдедлать проверку более точной
 
-    int ballsTotal = 0;
-    if (!InputValidator::validateBallCount(ballCountStr, ballsTotal)) {
-        return; // выход, если введеные данные не верны
+
+    int ballsNum = 0;
+
+    while (!(getline(cin, ballStr)) || !inputValidator::validateBallCount(ballStr, ballsNum))
+    {
+        cout << endl;
     }
 
-    list<int> ballColors = getBallColors(ballsTotal);
+    list<int> ballColors = getBallColors(ballsNum);
     int removedBalls = removeConsecutiveBalls(ballColors);
 
     cout << "Общее количество удалённых шариков: " << removedBalls << endl;
 }
 
-// Reads the ball colors from user input. Returns a list of ball colors.
-list<int> BallGame::getBallColors(int& ballCount) {
+// подсчет данных вводимых пользователем
+list<int> ballGame::getBallColors(int& ballCount) 
+{
     list<int> colorList;
 
     cout << "Введите " << ballCount << " целых чисел (цвета от 0 до 9): " << endl;
-    for (int i = 0; i < ballCount; ++i) {
-        int colorInput;
-        // Use a loop until valid input is obtained.
-        while (!(cin >> colorInput) || !InputValidator::validateBallColor(colorInput)) {
-            // Clear error flags and throw away invalid input
-            cout << "Ошибка ввода! Пожалуйста, введите корректное значение цвета шарика (целое число от 0 до 9): ";
-            cin.clear();  // Reset error flags
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Discard wrong input
+    for (int i = 0; i < ballCount; ++i)
+    {
+        int colorInput = 0;
+        string colorBall;
+
+        while (!(getline(cin,colorBall)) || !inputValidator::validateBallColor(colorBall, colorInput)) 
+    
+        {
+            cout << "Ввведите корректное значение цвета шарика (целое число от 0 до 9): ";
+            
         }
+
         colorList.push_back(colorInput);
     }
     return colorList;
 }
 
-// This function is meant to count and remove groups of consecutively matching balls.
-// There may be a more clever algorithm, but this version is straightforward and feels "human".
-int BallGame::removeConsecutiveBalls(list<int>& ballList) {
-    if (ballList.empty()) {
+//нахождение и удаление группы шаров
+int ballGame::removeConsecutiveBalls(list<int>& ballList) 
+{
+    if (ballList.empty())
+    {
         cout << "Нет шариков для обработки!" << endl;
         return 0;
     }
 
-    int totalDestroyed = 0;
-    bool groupRemoved;  // flag to check if any group was removed in a pass
+    int destroyed = 0; // переменная для подсчёта удаленных шаров
+    bool removed;  // переменная для проверки все ли цепочки удалены
 
-    // Loop until a full pass is made without any removals
-    do {
-        groupRemoved = false;
+    // цикл будет раюотать до тех пор, пока не будутудалены все цепочки
+    do 
+    {
+        removed = false;
         auto currentPos = ballList.begin();
 
-        // If there's nothing in the list, break out (shouldn't happen because of earlier check)
+       // если в списке ничего нет
         if (currentPos == ballList.end())
             break;
 
@@ -63,19 +73,23 @@ int BallGame::removeConsecutiveBalls(list<int>& ballList) {
         int consecutiveCount = 1;
         auto groupStart = currentPos;
         ++currentPos;
-        while (currentPos != ballList.end()) {
-            if (*currentPos == currentColor) {
+        while (currentPos != ballList.end())
+        {
+            if (*currentPos == currentColor)
+            {
                 consecutiveCount++;
             }
-            else {
-                // If we encountered enough consecutive balls, remove them.
-                if (consecutiveCount >= 3) {
-                    groupRemoved = true;
-                    totalDestroyed += consecutiveCount;
+            else
+            {
+                // если всстречается группа шаров больше 3, удаление
+                if (consecutiveCount >= 3)
+                {
+                    removed = true;
+                    destroyed += consecutiveCount;
                     ballList.erase(groupStart, currentPos);
-                    break;  // restart the iteration after removal
+                    break;  // повтор итерации после удаления группы шаров
                 }
-                // Otherwise, start counting the next group
+                // подсчёт следующуй грппы шаров
                 currentColor = *currentPos;
                 consecutiveCount = 1;
                 groupStart = currentPos;
@@ -83,68 +97,105 @@ int BallGame::removeConsecutiveBalls(list<int>& ballList) {
             ++currentPos;
         }
 
-        // After the while loop, check the last group if no removal happened in the loop.
-        if (!groupRemoved && consecutiveCount >= 3) {
-            totalDestroyed += consecutiveCount;
+        // проверка последней группы шаров
+        if (!removed && consecutiveCount >= 3) 
+        {
+            destroyed += consecutiveCount;
             ballList.erase(groupStart, ballList.end());
-            groupRemoved = true;
+            removed = true;
         }
-        // Note: sometimes I'll leave such redundant checks for clarity even if they might be merged
 
-    } while (groupRemoved);
+    } while (removed);
 
-    return totalDestroyed;
+    return destroyed;
 }
 
-/*
-    Validates the count of balls entered by the user.
-    I added some extra checks to avoid weird inputs. Sometimes I overdo input validation.
-*/
-bool InputValidator::validateBallCount(const string& rawInput, int& result) {
-    if (rawInput.empty()) {
+// проверка ввел ли пользователь строку
+bool inputValidator::validateBallCount(const string& ballStr, int& ballsNum) 
+{
+    if (ballStr.empty())
+    {
+        cout << "Ошибка! Введите число.";
+        return false;
+    }
+
+    //проверка на длину вводимого числа, оно должно быть меньше 10^5
+    if (ballStr.length() > 6)
+    {
+        cout << "Ошибка! Число слишком большое.";
+        return false;
+    }
+
+    for (char ch : ballStr) 
+    {
+        if (!isdigit(ch)) 
+        {
+            cout << "Ошибка! Пожалуйста, введите только цифры без лишних символов.";
+            return false;
+        }
+    }
+
+    // проверка, что число не начинается с 0, если оно не является единственным
+    if (ballStr[0] == '0' && ballStr.length() > 1) 
+    {
+        cout << "Ошибка! Число не может начинаться с 0.";
+        return false;
+    }
+
+    try 
+    {
+        ballsNum = stoi(ballStr);
+        return true;
+    }
+    catch (...)
+    {
+        cout << "Ошибка! Некорректное число.";
+        return false;
+    }
+}
+
+// проверка на ввод цыета шаров
+bool inputValidator::validateBallColor(const string& colorBall, int& colorInput)
+{
+    if (colorBall.empty())
+    {
         cout << "Ошибка! Введите число." << endl;
         return false;
     }
 
-    // Not allowing more than 6 digits (i.e., up to 999999)
-    if (rawInput.length() > 6) {
+    //проверка на длину вводимого числа, оно должно быть меньше 10^5
+    if (colorBall.length() > 1)
+    {
         cout << "Ошибка! Число слишком большое." << endl;
         return false;
     }
 
-    for (char ch : rawInput) {
-        if (!isdigit(ch)) {
+    for (char c : colorBall)
+    {
+        if (!isdigit(c))
+        {
             cout << "Ошибка! Пожалуйста, введите только цифры без лишних символов." << endl;
             return false;
         }
     }
 
-    // Avoid numbers starting with zero (unless it's a single '0')
-    if (rawInput[0] == '0' && rawInput.length() > 1) {
+    // проверка, что число не начинается с 0, если оно не является единственным
+    if (colorBall[0] == '0' && colorBall.length() > 1)
+    {
         cout << "Ошибка! Число не может начинаться с 0." << endl;
         return false;
     }
 
-    try {
-        result = stoi(rawInput);
+    try
+    {
+        colorInput = stoi(colorBall);
         return true;
     }
-    catch (...) {
-        // I catch all exceptions here - a bit lazy but it works for now.
+    catch (...)
+    {
         cout << "Ошибка! Некорректное число." << endl;
         return false;
     }
-}
 
-/*
-    Checks if a ball color value is within the acceptable range [0, 9].
-    I generally trust the user, but this is just a safety check.
-*/
-bool InputValidator::validateBallColor(int color) {
-    // I use || here because if color is either less than 0 or greater than 9 it's invalid.
-    if (color < 0 || color > 9) {
-        cout << "Ошибка! Цвет должен быть от 0 до 9." << endl;
-        return false;
-    }
     return true;
 }

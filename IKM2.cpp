@@ -1,10 +1,12 @@
 ﻿#include "Header.h"
 
-int main() {
+int main()
+{
     setlocale(LC_ALL, "rus");
 
-    BallGame gameSession;
+    ballGame gameSession;
     gameSession.run();
 
     return 0;
 }
+

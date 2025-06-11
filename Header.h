@@ -8,17 +8,19 @@
 using namespace std; 
 
 // класс для проверки корректности данных
-class InputValidator {
+class inputValidator
+{
 public:
     // проверка верно ли введено число щаров
     static bool validateBallCount(const string& rawInput, int& result);
 
     //проверка верно ли введено число шариков
-    static bool validateBallColor(int color);
+    static bool validateBallColor(const string& colorBall, int& colorInput);
 };
 
 // класс для реализации самой игры
-class BallGame {
+class ballGame 
+{
 public:
     
     void run();
