@@ -166,7 +166,7 @@ bool inputValidator::validateBallColor(const string& colorBall, int& colorInput)
     //проверка на длину вводимого числа, оно должно быть меньше 10^5
     if (colorBall.length() > 1)
     {
-        cout << "Ошибка! Число слишком большое." << endl;
+        cout << "Ошибка! Введите число корректно." << endl;
         return false;
     }
 
