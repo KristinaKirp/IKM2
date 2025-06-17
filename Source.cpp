@@ -2,6 +2,10 @@
 
 void ballGame::run()
 {
+    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     cout << "Шарики\n"
         << "Вы вводите цифры, которые обозначают цвета шариков.\n"
         << "При появлении трёх и более подряд одинаковых чисел, программа удаляет их.\n" << endl;
@@ -18,16 +22,16 @@ void ballGame::run()
         cout << endl;
     }
 
-    list<int> ballColors = getBallColors(ballsNum);
+    list ballColors = getBallColors(ballsNum);
     int removedBalls = removeConsecutiveBalls(ballColors);
 
     cout << "Общее количество удалённых шариков: " << removedBalls << endl;
 }
 
 // подсчет данных вводимых пользователем
-list<int> ballGame::getBallColors(int& ballCount) 
+list ballGame::getBallColors(int ballCount) 
 {
-    list<int> colorList;
+    list colorList;
 
     cout << "Введите " << ballCount << " целых чисел (цвета от 0 до 9): " << endl;
     for (int i = 0; i < ballCount; ++i)
@@ -42,40 +46,42 @@ list<int> ballGame::getBallColors(int& ballCount)
             
         }
 
-        colorList.push_back(colorInput);
+        colorList.addBall(colorInput);
     }
     return colorList;
 }
 
 //нахождение и удаление группы шаров
-int ballGame::removeConsecutiveBalls(list<int>& ballList) 
+int ballGame::removeConsecutiveBalls(list& ballList) 
 {
-    if (ballList.empty())
+    if (ballList.isEmpty())
     {
         cout << "Нет шариков для обработки!" << endl;
         return 0;
     }
 
-    int destroyed = 0; // переменная для подсчёта удаленных шаров
-    bool removed;  // переменная для проверки все ли цепочки удалены
+    int destroyed = 0;  // переменная для подсчёта удаленных шаров
+    bool removed;   // переменная для проверки все ли цепочки удалены
 
     // цикл будет раюотать до тех пор, пока не будутудалены все цепочки
     do 
     {
         removed = false;
-        auto currentPos = ballList.begin();
+        ballNode* currentPos = ballList.getHead();
+        ballNode* group = currentPos;
+        ballNode* prev = nullptr;
 
        // если в списке ничего нет
-        if (currentPos == ballList.end())
+        if (currentPos == nullptr)
             break;
 
-        int currentColor = *currentPos;
+        int currentColor = currentPos -> color;
         int consecutiveCount = 1;
         auto groupStart = currentPos;
-        ++currentPos;
-        while (currentPos != ballList.end())
+        currentPos = currentPos -> next;
+        while (currentPos != nullptr)
         {
-            if (*currentPos == currentColor)
+            if (currentPos -> color == currentColor)
             {
                 consecutiveCount++;
             }
@@ -86,22 +92,23 @@ int ballGame::removeConsecutiveBalls(list<int>& ballList)
                 {
                     removed = true;
                     destroyed += consecutiveCount;
-                    ballList.erase(groupStart, currentPos);
+                    ballNode* nextNode = currentPos;
+                    ballList.eraseBall(groupStart, currentPos);
                     break;  // повтор итерации после удаления группы шаров
                 }
                 // подсчёт следующуй грппы шаров
-                currentColor = *currentPos;
+                currentColor = currentPos -> color;
                 consecutiveCount = 1;
                 groupStart = currentPos;
             }
-            ++currentPos;
+            currentPos = currentPos -> next;
         }
 
         // проверка последней группы шаров
         if (!removed && consecutiveCount >= 3) 
         {
             destroyed += consecutiveCount;
-            ballList.erase(groupStart, ballList.end());
+            ballList.eraseBall(groupStart, nullptr);
             removed = true;
         }
 
@@ -118,7 +125,11 @@ bool inputValidator::validateBallCount(const string& ballStr, int& ballsNum)
         cout << "Ошибка! Введите число.";
         return false;
     }
-
+    if (ballStr[0] == '0')
+    {
+        cout << "Введите число больше 0" << endl;
+        return false;
+    }
     //проверка на длину вводимого числа, оно должно быть меньше 10^5
     if (ballStr.length() > 6)
     {
